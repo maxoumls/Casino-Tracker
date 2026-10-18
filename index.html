@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080a0f">
+<title>Casino Tracker V11</title>
+<style>
+:root{
+  --bg:#080a0f;--panel:#121720;--panel2:#0d1118;--border:#252d3a;
+  --text:#f5f6fb;--muted:#929caf;--purple:#7c5cff;--purple2:#a58cff;
+  --green:#40d69a;--red:#ff6577;--nav:#0c1017;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif}
+body{min-height:100vh}
+button,input,select{font:inherit}
+button{border:0}
+.app{max-width:980px;margin:0 auto;padding:28px}
+.header{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:28px}
+.brand{display:flex;align-items:center;gap:16px}
+.logo{width:76px;height:76px;border-radius:24px;background:linear-gradient(145deg,#9275ff,#6244df);display:grid;place-items:center;font-size:38px;box-shadow:0 10px 30px #0005}
+h1{font-size:31px;margin:0 0 3px;font-weight:800;letter-spacing:-.8px}
+.subtitle{font-size:17px;color:var(--muted);font-weight:650}
+.primary{background:linear-gradient(135deg,#7655ef,#8d68ff);color:#fff;border-radius:20px;padding:16px 21px;font-weight:800;font-size:17px;box-shadow:0 8px 22px #6845e533}
+.page{display:none}
+.page.active{display:block}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.card,.statbox,.empty,.session{background:var(--panel);border:1px solid var(--border);border-radius:26px}
+.card{padding:28px}
+.metric .label{color:var(--muted);font-size:17px;font-weight:700}
+.metric .value{font-size:34px;font-weight:850;margin-top:20px;letter-spacing:-1px}
+.green{color:var(--green)}.red{color:var(--red)}
+.section{margin-top:26px}
+.section-title{font-size:26px;font-weight:850;margin:0 0 18px}
+.chart-card{padding:28px}
+.chart{height:220px;position:relative;overflow:hidden;border-radius:18px;background:#10151d}
+.chart-grid{position:absolute;inset:20px 18px 42px;display:flex;flex-direction:column;justify-content:space-between}
+.chart-grid span{height:1px;background:#202733;width:100%}
+svg{position:absolute;inset:20px 18px 42px;width:calc(100% - 36px);height:calc(100% - 62px);overflow:visible}
+.chart-empty{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font-weight:700;text-align:center;padding:30px}
+.month-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.statbox{padding:20px}
+.statbox .label{color:var(--muted);font-weight:650;font-size:15px}
+.statbox .num{font-size:27px;font-weight:850;margin-top:8px}
+.sessions{display:grid;gap:12px}
+.session{padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;cursor:pointer;transition:.18s}.session:hover{transform:translateY(-2px);border-color:#3b4658;background:#151c27}.session-actions{display:flex;align-items:center;gap:8px}.chev{color:var(--muted);font-size:20px}
+.session-left{min-width:0}
+.session-casino{font-weight:800;font-size:17px}
+.session-meta{color:var(--muted);font-size:13px;margin-top:5px}
+.session-result{font-weight:850;white-space:nowrap}
+.empty{padding:30px;text-align:center;color:var(--muted);font-weight:650}
+input,select{width:100%;background:#0c1118;border:1px solid var(--border);color:var(--text);border-radius:14px;padding:13px 14px;outline:none}
+label{display:block;color:var(--muted);font-size:13px;font-weight:750;margin:0 0 7px}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.full{grid-column:1/-1}
+.toolbar{display:flex;gap:12px;margin-bottom:18px}
+.toolbar input{flex:1}
+.toolbar select{max-width:190px}
+.actions{display:flex;gap:10px;margin-top:18px}
+.secondary{background:#202632;color:#fff;padding:12px 16px;border-radius:13px;font-weight:750}
+.danger{background:#2a151b;color:#ff8c9a;padding:12px 16px;border-radius:13px;font-weight:750}
+.overlay{position:fixed;inset:0;background:#0009;display:none;align-items:flex-end;justify-content:center;padding:18px;z-index:20}
+.overlay.open{display:flex}
+.modal{width:min(560px,100%);background:#11161f;border:1px solid var(--border);border-radius:28px;padding:24px;max-height:90vh;overflow:auto}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.modal h2{margin:0;font-size:24px}
+.close{width:40px;height:40px;border-radius:12px;background:#222936;color:#fff;font-size:22px}
+.nav-inner{width:min(760px,100%);display:grid;grid-template-columns:repeat(4,1fr)}
+.nav button{background:none;color:var(--muted);padding:9px 4px 5px;font-weight:800;font-size:13px;display:flex;flex-direction:column;align-items:center;gap:5px}
+.nav button .icon{font-size:23px;line-height:1}
+.nav button.active{color:#fff}
+.nav button.active .icon{color:var(--purple2)}
+.detail-hero{background:#0d121a;border:1px solid var(--border);border-radius:20px;padding:22px;text-align:center}.detail-label{color:var(--muted);font-size:13px;font-weight:750}.detail-result{font-size:42px;font-weight:900;margin-top:6px}.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.detail-grid>div{background:#0d121a;border:1px solid var(--border);border-radius:16px;padding:15px}.detail-grid span{display:block;color:var(--muted);font-size:12px;font-weight:700;margin-bottom:5px}.detail-grid b{font-size:15px}.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#f5f6fb;color:#10131a;padding:12px 16px;border-radius:14px;font-weight:800;opacity:0;pointer-events:none;transition:.2s;z-index:30}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+h2{font-size:26px}
+@media(max-width:720px){
+  .app{padding:18px 26px}
+  .header{align-items:flex-start}
+  .logo{width:72px;height:72px}
+  h1{font-size:29px}
+  .subtitle{font-size:16px}
+  .primary{padding:15px 17px;border-radius:19px}
+  .grid4{grid-template-columns:1fr 1fr;gap:16px}
+  .metric{padding:20px 20px;min-height:132px}
+  .metric .value{font-size:33px}
+  .chart-card{padding:20px}
+  .chart{height:225px}
+  .month-grid{grid-template-columns:1fr}
+  .statbox{padding:19px}
+  .section-title{font-size:24px}
+}
+@media(max-width:430px){
+  .app{padding-left:26px;padding-right:26px}
+  .header{gap:10px}
+  .brand{gap:12px}
+  .logo{width:68px;height:68px;border-radius:22px;font-size:34px}
+  h1{font-size:27px}
+  .subtitle{font-size:14px}
+  .primary{font-size:15px;padding:14px 15px}
+  .grid4{gap:14px}
+  .metric{min-height:126px;padding:19px 18px;border-radius:24px}
+  .metric .label{font-size:16px}
+  .metric .value{font-size:30px;margin-top:13px}
+  .card,.statbox,.empty,.session{border-radius:23px}
+  .chart-card{padding:18px}
+  .chart{height:210px}
+  .toolbar{flex-direction:column}
+  .toolbar select{max-width:none}
+  .formgrid{grid-template-columns:1fr}
+  .full{grid-column:auto}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="brand">
+      <div class="logo">♠</div>
+      <div><h1>Casino Tracker</h1><div class="subtitle">Suivi intelligent de tes sessions</div></div>
+    </div>
+    <button class="primary" onclick="openModal()">＋ Session</button>
+  </div>
+
+  <section id="home" class="page active">
+    <div class="grid4">
+      <div class="card metric"><div class="label">Total déposé</div><div class="value" id="dep">0 €</div></div>
+      <div class="card metric"><div class="label">Total retiré</div><div class="value" id="wit">0 €</div></div>
+      <div class="card metric"><div class="label">Résultat net</div><div class="value" id="net">0 €</div></div>
+      <div class="card metric"><div class="label">Sessions</div><div class="value" id="count">0</div></div>
+    </div>
+
+    <div class="section card chart-card">
+      <h2 class="section-title">Résultat cumulé</h2>
+      <div class="chart" id="chart">
+        <div class="chart-grid"><span></span><span></span><span></span><span></span><span></span></div>
+        <svg id="line" viewBox="0 0 1000 300" preserveAspectRatio="none"></svg>
+        <div class="chart-empty" id="chartEmpty">Ajoute ta première session pour voir<br>l'évolution de ton résultat.</div>
+      </div>
+    </div><div class="section card" style="padding:28px">
+      <h2 class="section-title">Dernières sessions</h2>
+      <div id="recent" class="sessions"></div>
+    </div>
+  </section>
+
+  <section id="history" class="page"><button class="secondary" onclick="go('home')" style="margin-bottom:18px">← Accueil</button>
+    <div class="card" style="padding:28px">
+      <h2 class="section-title">Historique</h2>
+      <div class="toolbar">
+        <input id="search" placeholder="Rechercher un casino…">
+        <select id="period"><option value="all">Toutes les périodes</option><option value="month">Ce mois</option><option value="year">Cette année</option></select>
+      </div>
+      <div id="allhistory" class="sessions"></div>
+    </div>
+  </section>
+
+  <section id="stats" class="page"><button class="secondary" onclick="go('home')" style="margin-bottom:18px">← Accueil</button>
+    <div class="card" style="padding:28px">
+      <h2 class="section-title">Statistiques</h2>
+      <div class="month-grid">
+        <div class="statbox"><div class="label">Sessions gagnantes</div><div class="num" id="wins">0</div></div>
+        <div class="statbox"><div class="label">Sessions perdantes</div><div class="num" id="losses">0</div></div>
+        <div class="statbox"><div class="label">Taux de réussite</div><div class="num" id="winrate">0 %</div></div>
+        <div class="statbox"><div class="label">Meilleur résultat</div><div class="num" id="topCasino">0 €</div></div>
+      </div>
+    </div>
+    <div class="section card" style="padding:28px"><h2 class="section-title">Par casino</h2><div id="casinos" class="sessions"></div></div>
+  </section>
+</div>
+
+<div class="overlay" id="modal">
+  <div class="modal">
+    <div class="modal-head"><h2>Ajouter une session</h2><button class="close" onclick="closeModal()">×</button></div>
+    <div class="formgrid">
+      <div class="full"><label>Casino</label><input id="casino" value="Circus Casino Resort Namur"></div>
+      <div><label>Dépôt (€)</label><input id="deposit" type="number" min="0" step="0.01" placeholder="0"></div>
+      <div><label>Retrait (€)</label><input id="withdraw" type="number" min="0" step="0.01" placeholder="0"></div>
+    </div>
+    <div class="actions"><button class="primary" style="width:100%" onclick="addSession()">Enregistrer la session</button></div>
+  </div>
+</div>
+<div class="overlay" id="details"><div class="modal"><div class="modal-head"><h2>Détails de la session</h2><button class="close" onclick="closeDetails()">×</button></div><div id="detailsBody"></div></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SKEY="ctv4_sessions";
+let sessions=JSON.parse(localStorage.getItem(SKEY)||"[]");
+
+
+function money(n){return `${n<0?"−":""}${Math.abs(n).toLocaleString("fr-BE",{minimumFractionDigits:0,maximumFractionDigits:2})} €`}
+function result(s){return Number(s.withdraw||0)-Number(s.deposit||0)}
+function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function dateObj(s){return new Date((s.date||"1970-01-01")+"T12:00:00")}
+function currentMonth(s){let d=dateObj(s),n=new Date();return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear()}
+function sum(arr,key){return arr.reduce((a,s)=>a+Number(s[key]||0),0)}
+function render(){
+  const dep=sum(sessions,"deposit"), wit=sum(sessions,"withdraw"), net=wit-dep;
+  set("dep",money(dep));set("wit",money(wit));set("net",money(net));set("count",sessions.length);
+  renderChart();renderRecent();renderHistory();renderStats();
+}
+function set(id,v){let e=document.getElementById(id);if(e)e.textContent=v}
+function renderChart(){
+  const svg=document.getElementById("line"), empty=document.getElementById("chartEmpty");svg.innerHTML="";
+  if(!sessions.length){empty.style.display="grid";return}
+  empty.style.display="none";
+  const ordered=[...sessions].sort((a,b)=>dateObj(a)-dateObj(b));
+  let cum=0, pts=ordered.map(s=>{cum+=result(s);return cum});
+  const min=Math.min(0,...pts),max=Math.max(0,...pts),range=Math.max(1,max-min);
+  const points=pts.map((v,i)=>`${(i/(pts.length-1||1))*1000},${285-((v-min)/range)*270}`).join(" ");
+  const poly=document.createElementNS("http://www.w3.org/2000/svg","polyline");
+  poly.setAttribute("points",points);poly.setAttribute("fill","none");poly.setAttribute("stroke","#9b82ff");poly.setAttribute("stroke-width","6");poly.setAttribute("stroke-linecap","round");poly.setAttribute("stroke-linejoin","round");
+  svg.appendChild(poly);
+  pts.forEach((v,i)=>{let c=document.createElementNS("http://www.w3.org/2000/svg","circle");c.setAttribute("cx",(i/(pts.length-1||1))*1000);c.setAttribute("cy",285-((v-min)/range)*270);c.setAttribute("r","6");c.setAttribute("fill","#9b82ff");svg.appendChild(c)})
+}
+function sessionHTML(s,withDelete=false){
+  const r=result(s);
+  return `<div class="session" onclick="openDetails('${s.id}')"><div class="session-left"><div class="session-casino">${esc(s.casino||"Casino")}</div><div class="session-meta">${esc(formatDate(s.date))} · Dépôt ${money(Number(s.deposit||0))} · Retrait ${money(Number(s.withdraw||0))}</div></div><div class="session-actions"><div style="text-align:right"><div class="session-result ${r>0?"green":r<0?"red":""}">${r>0?"+":""}${money(r)}</div></div><div class="chev">›</div></div></div>`
+}
+function formatDate(d){return d?new Date(d+"T12:00:00").toLocaleDateString("fr-BE",{day:"2-digit",month:"short",year:"numeric"}):"—"}
+function openDetails(id){
+  const s=sessions.find(x=>x.id===id); if(!s)return; const r=result(s);
+  document.getElementById("detailsBody").innerHTML=`<div class="detail-hero"><div class="detail-label">Résultat de la session</div><div class="detail-result ${r>0?"green":r<0?"red":""}">${r>0?"+":""}${money(r)}</div></div><div class="detail-grid"><div><span>Casino</span><b>${esc(s.casino||"—")}</b></div><div><span>Date</span><b>${esc(formatDate(s.date))}</b></div><div><span>Dépôt</span><b>${money(Number(s.deposit||0))}</b></div><div><span>Retrait</span><b>${money(Number(s.withdraw||0))}</b></div></div><button class="danger" style="width:100%;margin-top:18px" onclick="removeFromDetails('${s.id}')">Supprimer la session</button>`;
+  document.getElementById("details").classList.add("open");
+}
+function closeDetails(){document.getElementById("details").classList.remove("open")}
+function removeFromDetails(id){closeDetails();removeSession(id)}
+function renderRecent(){
+  const e=document.getElementById("recent"), arr=[...sessions].sort((a,b)=>(dateObj(b)-dateObj(a))||(Number(b.createdAt||b.id||0)-Number(a.createdAt||a.id||0))).slice(0,4);
+  e.innerHTML=arr.length?arr.map(s=>sessionHTML(s)).join(""):`<div class="empty">Aucune session pour le moment.<br>Ajoute ta première session avec « ＋ Session ».</div>`;
+}
+function renderHistory(){
+  const q=(document.getElementById("search")?.value||"").toLowerCase(), p=document.getElementById("period")?.value||"all",now=new Date();
+  let arr=[...sessions].sort((a,b)=>(dateObj(b)-dateObj(a))||(Number(b.createdAt||b.id||0)-Number(a.createdAt||a.id||0))).filter(s=>String(s.casino).toLowerCase().includes(q));
+  if(p==="month")arr=arr.filter(currentMonth);
+  if(p==="year")arr=arr.filter(s=>dateObj(s).getFullYear()===now.getFullYear());
+  const e=document.getElementById("allhistory");e.innerHTML=arr.length?arr.map(s=>sessionHTML(s,true)).join(""):`<div class="empty">Aucune session trouvée.</div>`;
+}
+function renderStats(){
+  let wins=sessions.filter(s=>result(s)>0).length,loss=sessions.filter(s=>result(s)<0).length;
+  set("wins",wins);set("losses",loss);set("winrate",sessions.length?Math.round(wins/sessions.length*100)+" %":"0 %");
+  let map={};sessions.forEach(s=>map[s.casino||"Casino"]=(map[s.casino||"Casino"]||0)+result(s));
+  let ranked=Object.entries(map).sort((a,b)=>b[1]-a[1]);
+  set("bestCasino",ranked[0]?.[0]||"—");
+  let best=Math.max(0,...sessions.map(result));set("topCasino",money(best));
+  const e=document.getElementById("casinos");
+  e.innerHTML=ranked.length?ranked.map(([name,val])=>`<div class="session"><div class="session-casino">${esc(name)}</div><div class="session-result ${val>0?"green":val<0?"red":""}">${val>0?"+":""}${money(val)}</div></div>`).join(""):`<div class="empty">Pas encore de données.</div>`;
+}
+function go(id){
+  document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===id));
+  window.scrollTo({top:0,behavior:"smooth"});render();
+}
+function openModal(){
+  document.getElementById("modal").classList.add("open");
+}
+function closeModal(){document.getElementById("modal").classList.remove("open")}
+function addSession(){
+  const casino=document.getElementById("casino").value.trim();
+  const today=new Date();
+  const date=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}-${String(today.getDate()).padStart(2,"0")}`;
+  const deposit=Number(document.getElementById("deposit").value||0);
+  const withdraw=Number(document.getElementById("withdraw").value||0);
+  if(!casino){toast("Indique le casino.");return}
+  if(deposit<=0 && withdraw<=0){toast("Indique au moins un montant.");return}
+  const now=Date.now();
+  sessions.push({id:String(now),createdAt:now,casino,date,deposit,withdraw});
+  localStorage.setItem(SKEY,JSON.stringify(sessions));closeModal();
+  ["deposit","withdraw"].forEach(id=>document.getElementById(id).value="");
+  toast("Session ajoutée.");render();
+}
+function removeSession(id){sessions=sessions.filter(s=>s.id!==id);localStorage.setItem(SKEY,JSON.stringify(sessions));render();toast("Session supprimée.")}
+function toast(t){let e=document.getElementById("toast");e.textContent=t;e.classList.add("show");setTimeout(()=>e.classList.remove("show"),1800)}
+document.getElementById("search").addEventListener("input",renderHistory);
+document.getElementById("period").addEventListener("change",renderHistory);
+document.getElementById("modal").addEventListener("click",e=>{if(e.target.id==="modal")closeModal()});
+document.getElementById("details").addEventListener("click",e=>{if(e.target.id==="details")closeDetails()});
+
+// Migration V2/V3 si les anciennes données existent.
+if(!sessions.length){
+  for(const key of ["ctv3","ctv2"]){
+    try{
+      const old=JSON.parse(localStorage.getItem(key)||"[]");
+      if(Array.isArray(old)&&old.length){sessions=old;localStorage.setItem(SKEY,JSON.stringify(sessions));break}
+    }catch(e){}
+  }
+}
+render();
+</script>
+</body>
+</html>
